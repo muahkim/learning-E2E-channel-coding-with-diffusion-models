@@ -16,11 +16,13 @@ pytorch >= 1.6
 CUDA (I don't know exactly, but I used) 11.6
 
 ## Sources
-Our paper about this study
+####Our paper about this study
+
 Conference version: https://scholar.google.com/citations?view_op=view_citation&hl=ko&user=VOl55dwAAAAJ&citation_for_view=VOl55dwAAAAJ:IjCSPb-OGe4C
+
 Full journal version: 
 
-Diffusion model tutorial: https://github.com/azad-academy/denoising-diffusion-model
+####Diffusion model tutorial: https://github.com/azad-academy/denoising-diffusion-model
 
-Autoencoder-based communication system: https://github.com/Fritschek/Modular-AE-with-Pytorch
+####Autoencoder-based communication system: https://github.com/Fritschek/Modular-AE-with-Pytorch
 
