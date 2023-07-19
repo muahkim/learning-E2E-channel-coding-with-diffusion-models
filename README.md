@@ -10,7 +10,9 @@ The rest of this file focuses on guidance of this repository and the resources I
 
 ## Implementation Environment
 Python >= 3.7
+
 pytorch >= 1.6
+
 CUDA (I don't know exactly, but I used) 11.6
 
 ## Sources
