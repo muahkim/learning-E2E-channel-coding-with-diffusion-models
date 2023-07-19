@@ -5,8 +5,9 @@ In the repository, there are notebook files enabling an end-to-end (E2E) framewo
 The E2E framwork's goal is to learn a pair of a neural encoder and a neural decoder achieving a small symbol error rate (SER).
 In real world, the channel models are not clearly known nor differentiable, 
 so we learn the channel distribution by using a diffusion model and replace the channel block by a synthesized channel sampled by the learned diffusion model.
-Please refer to our paper for more details. 
-The rest of this file focuses on guidance of this repository and the resources I used. 
+Please refer to our paper for more details.
+This repository has the source code that can reproduce the simulations in the paper and some visualizations that can help understanding.
+
 
 ## Implementation Environment
 Python >= 3.7
