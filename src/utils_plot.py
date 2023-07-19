@@ -193,7 +193,7 @@ def Constellation_InOut(enc, ch_model, ch_model_type, device, alphas, betas, alp
             ax[j].set_title(title)
     plt.show()
     
-    fig.savefig('figures/constellation_inout.pdf', format='pdf')
+    fig.savefig('figures/constellation_inout_'+ch_model_type+'.pdf', format='pdf')
     return            
 
 def Constellation_Enc(enc, M):
@@ -321,7 +321,7 @@ def ECDF_histogram_m(enc, ch_model, ch_model_type, device, alphas, betas, alphas
     
     fig.tight_layout()
     plt.legend()
-    plt.savefig('figures/ECDF_histogram.pdf', bbox_inches = 'tight')
+    plt.savefig('figures/ECDF_histogram_'+ch_model_type+'.pdf', bbox_inches = 'tight')
     plt.show()
     return
 
@@ -571,11 +571,11 @@ def Constellation_InOut_s(enc, ch_model, ch_model_type, device, alphas, betas, a
         ax[0].set_title('True Channel Output')
         ax[1].set_title('Generated Channel Output')
         
-        plt.savefig('figures/channel_output_constell.pdf', bbox_inches= 'tight')
+        plt.savefig('figures/channel_output_constell_'+ch_model_type+'.pdf', bbox_inches= 'tight')
         extent = ax[0].get_window_extent().transformed(fig.dpi_scale_trans.inverted())
-        fig.savefig('figures/generated_ch_output.pdf', bbox_inches=extent.expanded(1.2, 1.2))
+        fig.savefig('figures/generated_ch_output_'+ch_model_type+'.pdf', bbox_inches=extent.expanded(1.2, 1.2))
         extent = ax[1].get_window_extent().transformed(fig.dpi_scale_trans.inverted())
-        fig.savefig('figures/true_ch_output.pdf', bbox_inches=extent.expanded(1.2, 1.2))
+        fig.savefig('figures/true_ch_output_'+ch_model_type+'.pdf', bbox_inches=extent.expanded(1.2, 1.2))
 
         
         #plt.legend()
