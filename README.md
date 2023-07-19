@@ -2,7 +2,7 @@
 This repository contains the simulations used in the paper having the same title as the repository name.
 It is open to public, so please play around or use for your research, study, education, etc.
 In the repository, there are notebook files enabling an end-to-end (E2E) framework for each of three channel models: AWGN channel, real Rayleigh fading channel, and a channel model with solid state power amplifier (SSPA). 
-The E2E framwork's goal is to learn a pair of a neural encoder and a neural decoder achieving a small symbol error rate (SER).
+The E2E framwork's goal is to learn a pair of a neural encoder and a neural decoder achieving a small symbol error rate.
 In real world, the channel models are not clearly known nor differentiable, 
 so we learn the channel distribution by using a diffusion model and replace the channel block by a synthesized channel sampled by the learned diffusion model.
 Please refer to our paper for more details.
