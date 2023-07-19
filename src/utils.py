@@ -56,7 +56,7 @@ def extract(input, t, shape):
     #    shape = x.shape
     out = torch.gather(input, 0, t.to(input.device))
     reshape = [t.shape[0]] + [1] * (len(shape) - 1)
-    return out.reshape(*reshape)
+    return out.reshape(*reshape).to(input.device)
 
 def q_posterior_mean_variance(x_0, x_t, t,posterior_mean_coef_1,posterior_mean_coef_2,posterior_log_variance_clipped):
     shape = x_0.shape
@@ -153,6 +153,7 @@ def p_sample_w_Condition_v(model, z, t, alphas, betas, alphas_bar_sqrt, one_minu
         a_next = torch.ones_like(z)
         am1_next = torch.zeros_like(z)
 
+
     # Model output
     v_theta = model(z, t, c)
     e = torch.randn_like(z)
@@ -171,6 +172,10 @@ def p_sample_loop_w_Condition(model, shape, n_steps, alphas, betas, alphas_bar_s
     device = model.this_device
     cur_x = torch.randn(shape).to(device)
     c = c.to(device)
+    alphas = alphas.to(device)
+    betas = betas.to(device)
+    alphas_bar_sqrt = alphas_bar_sqrt.to(device)
+    one_minus_alphas_bar_sqrt = one_minus_alphas_bar_sqrt.to(device)
 
     if pred_type == 'epsilon':
         p_sample_func = p_sample_w_Condition
@@ -221,6 +226,10 @@ def p_sample_loop_w_Condition_DDIM(model, shape, traj, alphas_prod, alphas_bar_s
     device = model.this_device
     cur_x = torch.randn(shape).to(device) # randomly sampled x_T
     c = c.to(device)
+    alphas_prod = alphas_prod.to(device)
+    alphas_bar_sqrt = alphas_bar_sqrt.to(device)
+    one_minus_alphas_bar_sqrt = one_minus_alphas_bar_sqrt.to(device)
+
 
     traj_next = [-1] + list(traj[:-1]) # t-1
 
