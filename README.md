@@ -16,6 +16,17 @@ pytorch >= 1.6
 
 CUDA (I don't know exactly, but I used) 11.6
 
+## Parameters and Options Available
+### Communication Channel
+* Channel models: AWGN, Rayleigh, SSPA
+* Prameters: cardinality of message set 'M', block length 'n', Training Eb/N0 'TRAINING_Eb/N0'.  
+
+### Difusion-Denoising Models
+* Prediction variable and loss: 'epsilon', 'v'
+* Sampling algorithm: 'DDPM', 'DDIM'
+* Diffusion noise (beta) scheduling: sigmoid, cosine, no scheduling (constant). 
+* Parameters: # of diffusion steps 'num_steps', step size of skipped sampling 'skip'.
+
 ## Sources
 #### Our paper about this study
 
