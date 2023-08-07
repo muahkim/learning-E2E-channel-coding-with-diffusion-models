@@ -30,7 +30,7 @@ The source codes are in the .ipynb format and are straightforward. You can easil
 * Parameters: # of diffusion steps 'num_steps', step size of skipped sampling 'skip'.
 
 ## Sources
-Our papers about this study: [Conference version](https://scholar.google.com/citations?view_op=view_citation&hl=ko&user=VOl55dwAAAAJ&citation_for_view=VOl55dwAAAAJ:IjCSPb-OGe4C), [Full journal version](https:) 
+Our papers about this study: [conference version](https://scholar.google.com/citations?view_op=view_citation&hl=ko&user=VOl55dwAAAAJ&citation_for_view=VOl55dwAAAAJ:IjCSPb-OGe4C), [full journal version](https:) 
 
 [azad-academy/denoising-diffusion-model](https://github.com/azad-academy/denoising-diffusion-model): We referred to the simple implementation of the diffusion models with MLPs.
 
