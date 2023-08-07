@@ -6,7 +6,7 @@ The E2E framework's final goal is to learn a pair of a neural encoder and a neur
 In the real world, the channel models are not clearly known nor differentiable, 
 so we learn the channel distribution by using a diffusion model and replace the channel block with a synthesized channel sampled by the learned diffusion model.
 Please refer to our papers for more details. You can find the links of them below. 
-This repository has the source code that can reproduce the simulations in the paper and some visualizations that can help understanding.
+This repository has the source code that can reproduce the simulations in the paper and some visualizations that can help understanding. 
 
 
 ## Implementation Environment
@@ -32,6 +32,9 @@ The source codes are in the .ipynb format and are straightforward. You can easil
 ## Sources
 Our papers about this study: [conference version](https://scholar.google.com/citations?view_op=view_citation&hl=ko&user=VOl55dwAAAAJ&citation_for_view=VOl55dwAAAAJ:IjCSPb-OGe4C), [full journal version](https:) 
 
-[azad-academy/denoising-diffusion-model](https://github.com/azad-academy/denoising-diffusion-model): We referred to the simple implementation of the diffusion models with MLPs.
+[azad-academy/denoising-diffusion-model](https://github.com/azad-academy/denoising-diffusion-model): we referred to the simple implementation of the diffusion models with MLPs.
 
+[karpathy/minGPT](https://github.com/karpathy/minGPT): we referred to this repository's structure to build up the skeleton code mainly for the autoencoder part.
 
+## Acknowledgement
+This repository is developed together with [Rick Fritschek](https://github.com/Fritschek/). 
