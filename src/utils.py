@@ -8,15 +8,9 @@ import math
 assert sys.version_info >= (3, 5)
 import matplotlib as mpl
 import matplotlib.pyplot as plt
-#mpl.rc('axes', labelsize=14)
-#mpl.rc('xtick', labelsize=12)
-#mpl.rc('ytick', labelsize=12)
-#from scipy import special, integrate
-#from scipy.spatial import distance
 import torch.nn.functional as F
 from torch import nn
 np.random.seed(42)
-#from sklearn.neighbors import NearestNeighbors
 
 
 def make_beta_schedule(schedule='linear', n_timesteps=1000, start=1e-5, end=1e-2):
@@ -53,7 +47,6 @@ def make_beta_schedule(schedule='linear', n_timesteps=1000, start=1e-5, end=1e-2
     return betas
 
 def extract(input, t, shape):
-    #    shape = x.shape
     out = torch.gather(input, 0, t.to(input.device))
     reshape = [t.shape[0]] + [1] * (len(shape) - 1)
     return out.reshape(*reshape).to(input.device)
@@ -73,33 +66,7 @@ def p_mean_variance(model, x, t):
     mean, log_var = torch.split(out, 2, dim=-1)
     var = torch.exp(log_var)
     return mean, log_var
-'''
-def p_sample(model, x, t,alphas,betas,one_minus_alphas_bar_sqrt):
-    t = torch.tensor([t])
-    shape = x.shape
-    # Factor to the model output
-    eps_factor = ((1 - extract(alphas, t, shape)) / extract(one_minus_alphas_bar_sqrt, t, shape))
-    # Model output
-    eps_theta = model(x, t)
-    # Final values
-    mean = (1 / extract(alphas, t, shape).sqrt()) * (x - (eps_factor * eps_theta))
-    # Generate z
-    z = torch.randn_like(x)
-    # Fixed sigma
-    sigma_t = extract(betas, t, shape).sqrt() # Simplified version
-    #sigma_t =  ( 1 - a ** 2 / a_next ** 2) ** 0.5 * am1_next / am1 # full version
-    sample = mean + sigma_t * z
-    return (sample)
 
-def p_sample_loop(model, shape, n_steps,alphas,betas,one_minus_alphas_bar_sqrt):
-    device = model.this_device
-    cur_x = torch.randn(shape).to(device)
-    x_seq = [cur_x]
-    for i in reversed(range(n_steps)):
-        cur_x = p_sample(model, cur_x, i,alphas,betas,one_minus_alphas_bar_sqrt)
-        x_seq.append(cur_x)
-    return x_seq
-'''
 def p_sample_w_Condition(model, z, t, alphas, betas, alphas_bar_sqrt, one_minus_alphas_bar_sqrt, c):
     device = model.this_device
     z = z.to(device)
@@ -199,9 +166,6 @@ def p_sample_w_Condition_DDIM(model, xt, i, j, alphas_prod, alphas_bar_sqrt, one
         at_next = torch.ones(shape).to(device)  # a_0 = 1
 
     et = model(xt, torch.tensor([i]).to(device), c)
-    #        x0_t =  (xt - et * (1 - at).sqrt()) / at.sqrt()
-    #        c2 = (1 - at_next).sqrt()
-    #        xt_next = at_next.sqrt() * x0_t + c2 * et
     xt_next = at_next.sqrt() * (xt - et * (1 - at).sqrt()) / at.sqrt() + (1 - at_next).sqrt() * et
     return xt_next
 
@@ -276,44 +240,6 @@ def q_sample(x_0, t, alphas_bar_sqrt, one_minus_alphas_bar_sqrt ,noise=None):
     alphas_t = extract(alphas_bar_sqrt, t, shape)
     alphas_1_m_t = extract(one_minus_alphas_bar_sqrt, t, shape)
     return (alphas_t * x_0 + alphas_1_m_t * noise)
-'''
-def loss_variational(model, x_0,alphas_bar_sqrt, one_minus_alphas_bar_sqrt,posterior_mean_coef_1,posterior_mean_coef_2,posterior_log_variance_clipped,n_steps):
-    batch_size = x_0.shape[0]
-    # Select a random step for each example
-    t = torch.randint(0, n_steps, size=(batch_size // 2 + 1,))
-    t = torch.cat([t, n_steps - t - 1], dim=0)[:batch_size].long()
-    # Perform diffusion for step t
-    x_t = q_sample(x_0, t, alphas_bar_sqrt, one_minus_alphas_bar_sqrt)
-    # Compute the true mean and variance
-    true_mean, true_var = q_posterior_mean_variance(x_0, x_t, t,posterior_mean_coef_1,posterior_mean_coef_2,posterior_log_variance_clipped)
-    # Infer the mean and variance with our model
-    model_mean, model_var = p_mean_variance(model, x_t, t)
-    # Compute the KL loss
-    kl = normal_kl(true_mean, true_var, model_mean, model_var)
-    kl = torch.mean(kl.view(batch_size, -1), dim=1) / np.log(2.)
-    # NLL of the decoder
-    decoder_nll = -discretized_gaussian_log_likelihood(x_0, means=model_mean, log_scales=0.5 * model_var)
-    decoder_nll = torch.mean(decoder_nll.view(batch_size, -1), dim=1) / np.log(2.)
-    # At the first timestep return the decoder NLL, otherwise return KL(q(x_{t-1}|x_t,x_0) || p(x_{t-1}|x_t))
-    output = torch.where(t == 0, decoder_nll, kl)
-    return output.mean(-1)
-
-def noise_estimation_loss(model, x_0,alphas_bar_sqrt,one_minus_alphas_bar_sqrt,n_steps):
-    shape = x_0.shape
-    batch_size = shape[0]
-    # Select a random step for each example
-    t = torch.randint(0, n_steps, size=(batch_size // 2 + 1,))
-    t = torch.cat([t, n_steps - t - 1], dim=0)[:batch_size].long()
-    # x0 multiplier
-    a = extract(alphas_bar_sqrt, t, shape)
-    # eps multiplier
-    am1 = extract(one_minus_alphas_bar_sqrt, t, shape)
-    e = torch.randn_like(x_0)
-    # model input
-    x = x_0 * a + e * am1
-    output = model(x, t)
-    return (e - output).square().mean()
-'''
 
 def noise_estimation_loss(model, x_0, alphas_bar_sqrt, one_minus_alphas_bar_sqrt, n_steps, n):
     device = model.this_device
@@ -374,17 +300,7 @@ def v_estimation_loss(model, x_0, alphas_bar_sqrt, one_minus_alphas_bar_sqrt, n_
     else:
         raise ValueError('Unrecognized weight type. Possible options are SNR, SNRp1, SNRtr, and no_weighting.')
 
-    # loss corresponding to the model output
-
     v = e * a - x * am1
-
-    #    if prediction_var == 'e': # epsilon_prediction
-    #        v_hat = output * a - x * am1
-    #    elif prediction_var == 'x':  # x_prediction
-    #        v_hat = e * a - output * am1
-    #    elif prediction_var == 'v':
-    #        v_hat = output
-    #    else: raise ValueError('Unrecognized variable for prediction. Possible options are e, x, v. e represents epsilon.' )
 
     loss = (v - output).square()
 
@@ -401,38 +317,6 @@ def SNR_to_noise(snrdb):
     snr = 10**(snrdb/10)
     noise_std = 1/np.sqrt(2*snr)
     return noise_std
-
-def B_Ber_m(input_msg, msg):
-    '''Calculate the Batch Symbol Error Rate'''
-    batch, bits = msg.size()
-
-    pred_error = torch.ne(input_msg, torch.round(msg))
-    bber = torch.sum(pred_error)/(batch*bits)
-    return bber
-
-def Interleaver_set(dataset):
-    '''Interleave the whole codeword set at once, set length needs to be a mupltiple of 255'''
-    output=[dataset[i:i + 255].transpose() for i in range(0, len(dataset), 255)]
-    return np.vstack(output)
-
-def prediction_errors(input_msg, msg):
-    pred_error = torch.ne(torch.flatten(input_msg), msg.argmax(dim=1))
-    return pred_error
-
-def block_error(prediction_matrix, erasures_matrix, erasure=False):
-    if erasure:
-        errors_wo_erasures = torch.logical_and(prediction_matrix, torch.logical_not(erasures_matrix))
-        errors = torch.sum(errors_wo_erasures, dim=1)
-        erasures = torch.sum(erasures_matrix, dim=1)
-        #if torch.sum(erasures>1)>1: print(torch.sum(erasures>1))
-        errors_tot = torch.sum(2*errors + erasures > 32)
-        block_error = errors_tot/255
-
-    else:
-        errors = torch.sum(prediction_matrix, dim=1)
-        block_error =torch.sum(errors>16)/255
-
-    return block_error
 
 def SER(input_msg, msg, erasure_bound=0.9):
 
@@ -522,66 +406,6 @@ def plot_batch_loss(epoch, mean_loss, X_batch, y_pred):
     template_outer_loop = 'Interim result for Epoch: {}, Loss: {:.5f}, Batch_BER: {:.5f}'
     print(template_outer_loop.format(epoch, mean_loss, B_Ber_m(X_batch, y_pred)))
 
-# Approximate 16 QAM Error
-
-def SIXT_QAM_sim(ebnodb):
-    return (3.0/2)*special.erfc(np.sqrt((4.0/10)*10.**(ebnodb/10)))
-
-def BPSK_rayleigh(ebnodb, n, k):
-    ebn0 = 10.**(ebnodb/10)
-    return 0.5 * (1-np.sqrt((n/k)*ebn0 / ((n/k)*ebn0+1)))
-
-def MQAM_rayleigh_approx(M, ebnodb):
-    ebno = 10.**(ebnodb/10)
-    esno = 4*ebno
-    #Goldsmith, p.185, 6.3.2, Eqn 6.61, alphaM=4, betaM=3/(M-1)
-    a=3.25
-    b=3/(M-1)
-    e=b*esno
-    return (a/2)*(1-np.sqrt(0.5*e / (1+0.5*e) ) ), a/(2*b*esno)
-
-def rayleigh_error(ebnodb):
-    esno=4*10.**(ebnodb/10)
-    def awgn_ser(esno):
-        return 1.5*special.erfc(np.sqrt(0.1*esno))
-    def weighted_ser(x):
-        weight=2*x*np.exp(-x*np.conj(x))
-        return weight*awgn_ser(esno*x*np.conj(x))
-    r,e = integrate.quad(weighted_ser,0,np.inf)
-    return r
-
-def PSK_1h(m, avg_power): # m is one-hot encdoed tensor 
-    M = m.size()[1] # message cardinality
-    label = torch.argmax(m,dim=1)
-
-    x= torch.zeros([m.size()[0],2]) # complex channel
-    rad = torch.linspace(0,2*math.pi,steps=M+1)[:M] # phase
-
-    x[:,0] = math.sqrt(avg_power/2)*torch.cos(rad[label])
-    x[:,1] = math.sqrt(avg_power/2)*torch.sin(rad[label])
-    return x
-
-def NN_det_1h(r_seq, table):
-    m = torch.zeros([r_seq.size()[0],table.size()[0]])
-    #sym = torch.zeros([r_seq.size()[0],table.size()[1]])
-    for i in range(r_seq.size()[0]):
-        distance = torch.sum((table - r_seq[i,:]) ** 2  ,dim=1)
-        m[i,torch.argmin(distance, dim=0)] = 1
-        #sym[i,:] = table[torch.argmin(distance, dim=0), :]
-    return m
-
-def NN_det_old(r_seq, table):
-    sym = torch.zeros([r_seq.size()[0],table.size()[1]])
-    for i in range(r_seq.size()[0]):
-        distance = torch.sum((table - r_seq[i,:]) ** 2  ,dim=1)
-        sym[i,:] = table[torch.argmin(distance, dim=0), :]
-    return sym
-
-def NN_det(r_seq, table):
-    nbrs = NearestNeighbors(n_neighbors=1, algorithm='ball_tree').fit(table)
-    _, indices = nbrs.kneighbors(r_seq)
-    return indices
-
 def qam16_mapper_n(m):
     # m takes in a vector of messages
     x = np.linspace(-3,3,4)
@@ -590,8 +414,6 @@ def qam16_mapper_n(m):
     z = z / np.std(z)
 
     return np.array([[z[0][i],z[1][i]] for i in m])
-
-
 
 class LoadModels:
     def __init__(self, path, Load_model_gen,  model_gen, tag_load_gen, Load_model_AE, model_enc, model_dec, tag_load_AE):
