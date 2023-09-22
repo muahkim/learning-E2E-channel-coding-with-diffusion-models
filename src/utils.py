@@ -212,27 +212,6 @@ def p_sample_loop_w_Condition_DDIM(model, shape, traj, alphas_prod, alphas_bar_s
 
     return x_seq
 
-def approx_standard_normal_cdf(x):
-    return 0.5 * (1.0 + torch.tanh(torch.tensor(np.sqrt(2.0 / np.pi)) * (x + 0.044715 * torch.pow(x, 3))))
-
-def discretized_gaussian_log_likelihood(x, means, log_scales):
-    # Assumes data is integers [0, 255] rescaled to [-1, 1]
-    centered_x = x - means
-    inv_stdv = torch.exp(-log_scales)
-    plus_in = inv_stdv * (centered_x + 1. / 255.)
-    cdf_plus = approx_standard_normal_cdf(plus_in)
-    min_in = inv_stdv * (centered_x - 1. / 255.)
-    cdf_min = approx_standard_normal_cdf(min_in)
-    log_cdf_plus = torch.log(torch.clamp(cdf_plus, min=1e-12))
-    log_one_minus_cdf_min = torch.log(torch.clamp(1 - cdf_min, min=1e-12))
-    cdf_delta = cdf_plus - cdf_min
-    log_probs = torch.where(x < -0.999, log_cdf_plus, torch.where(x > 0.999, log_one_minus_cdf_min, torch.log(torch.clamp(cdf_delta, min=1e-12))))
-    return log_probs
-
-def normal_kl(mean1, logvar1, mean2, logvar2):
-    kl = 0.5 * (-1.0 + logvar2 - logvar1 + torch.exp(logvar1 - logvar2) + ((mean1 - mean2) ** 2) * torch.exp(-logvar2))
-    return kl
-
 def q_sample(x_0, t, alphas_bar_sqrt, one_minus_alphas_bar_sqrt ,noise=None):
     shape = x_0.shape
     if noise is None:
@@ -347,64 +326,6 @@ def SER(input_msg, msg, erasure_bound=0.9):
 
 
     return ser, pred_error, indices_erasures
-
-def Block_ER(input_msg, msg):
-    '''Calculate the Batch Symbol Error Rate'''
-    batch, bits = msg.size()
-
-    pred_error = torch.ne(input_msg, torch.round(msg))
-    ber,_ = torch.max(pred_error, dim=1)
-    bber = torch.sum(ber)
-    if bber < 17:
-        bler = 0.
-    else:
-        bler = 1.
-    return bler
-
-def random_sample(batch_size=32, M=16):
-    msg = torch.randint(0,2, size=(batch_size, 1))
-    return msg
-
-def test_encoding(encoder, M=16, n=1):
-    inp = np.arange(0,M)
-    coding = encoder(inp).detach()
-    fig = plt.figure(figsize=(4,4))
-    plt.plot(coding[:,0], coding[:, 1], "b.")
-    plt.xlabel("$x_1$", fontsize=18)
-    plt.ylabel("$x_2$", fontsize=18, rotation=0)
-    plt.grid(True)
-    plt.gca().set_ylim(-2, 2)
-    plt.gca().set_xlim(-2, 2)
-    plt.show()
-
-def test_noisy_codeword(data):
-    rcvd_word = data[1:2000]
-    fig = plt.figure(figsize=(4,4))
-    plt.plot(rcvd_word[:,0], rcvd_word[:, 1], "b.")
-    plt.xlabel("$x_1$", fontsize=18)
-    plt.ylabel("$x_2$", fontsize=18, rotation=0)
-    plt.grid(True)
-    plt.gca().set_ylim(-2, 2)
-    plt.gca().set_xlim(-2, 2)
-    plt.show()
-
-def minimum_distance(encoder, M, n):
-    inp = np.arange(0,M)
-    code = encoder(inp).detach()
-    code_flat = np.reshape(code, (M,n))
-    distmat = distance.cdist(code_flat,code_flat, 'euclidean')+np.identity(M)*np.exp(100)
-    return np.min(distmat)
-
-def plot_loss(encoder, M, n, step, epoch, mean_loss, X_batch, y_pred, plot_encoding):
-    template = 'Iteration: {}, Epoch: {}, Loss: {:.5f}, Batch_BER: {:.5f}'
-    if step % 500 == 0:
-        print(template.format(step, epoch, mean_loss, B_Ber_m(X_batch, y_pred)))
-        if plot_encoding:
-            test_encoding(encoder, M=16, n=1)
-
-def plot_batch_loss(epoch, mean_loss, X_batch, y_pred):
-    template_outer_loop = 'Interim result for Epoch: {}, Loss: {:.5f}, Batch_BER: {:.5f}'
-    print(template_outer_loop.format(epoch, mean_loss, B_Ber_m(X_batch, y_pred)))
 
 def qam16_mapper_n(m):
     # m takes in a vector of messages
