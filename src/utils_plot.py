@@ -17,7 +17,7 @@ mpl.rcParams['font.family'] = "serif"
 
 mpl.rc('axes', labelsize=14)
 mpl.rc('xtick', labelsize=12)
-mpl.rc('ytick', labelsize=12)
+mpl.rc('ytick', labelsize=12) 
 np.random.seed(42)
 from channel_models import *
 
@@ -82,15 +82,17 @@ def Constellation_InOut_m(enc, ch_model, ch_model_type, device, alphas, betas, a
         plt.title(title)
         plt.legend()
     else:
-        fig, ax = plt.subplots(1,n//2,figsize=(10,4))
+        fig, ax = plt.subplots(1,n//2,figsize=(n//2 * 3,3))
+        if n % 2 == 1:
+            print("The last dimension is omitted in this 2-dimensional representation because $n$ is an odd number.")
         for j in range(n // 2):
             ax[j].scatter(y_gen[:,2*j], y_gen[:,2*j+1], edgecolor=(1,0,0,0.8), label='generated', facecolor=(1,1,1,0.5))
             ax[j].scatter(y[:,2*j], y[:,2*j+1], edgecolor=(0,0.3,0.3,0.7), label='ground truth', facecolor=(1,1,1,0.5))
             ax[j].scatter(x[:,2*j], x[:,2*j+1], edgecolor=(0,0,0,0.8), label='channel input',facecolor=(1,1,1,0.5) )
             ax[j].set_xlim([-max_amp, max_amp])
             ax[j].set_ylim([-max_amp, max_amp])
-            ax[j].set_xlabel('$Re(y_'+ str(j+1)+ ')$')
-            ax[j].set_ylabel('$Im(y_'+ str(j+1)+')$')
+            ax[j].set_xlabel('$y_'+ str(2*j+1)+ '$')
+            ax[j].set_ylabel('$y_'+ str(2*j+2)+'$')
             title = '$m = '+ str(m+1)+'$'
             ax[j].set_title(title)
             ax[j].legend()       
@@ -184,11 +186,14 @@ def Constellation_InOut(enc, ch_model, ch_model_type, device, alphas, betas, alp
         title = 'Channel Output Constellation'
         plt.title(title)
     else:
+        if n % 2 == 1:
+            print("The last dimension is omitted in this 2-dimensional representation because $n$ is an odd number.")
+
         for j in range(n // 2):
             ax[j].set_xlim([-max_amp, max_amp])
             ax[j].set_ylim([-max_amp, max_amp])
-            ax[j].set_xlabel('$Re(y_' + str(j + 1) + ')$')
-            ax[j].set_ylabel('$Im(y_' + str(j + 1) + ')$')
+            ax[j].set_xlabel('$y_' + str(2*j + 1) + ')$')
+            ax[j].set_ylabel('$y_' + str(2*j + 2) + ')$')
             title = 'Channel Output Constellation'
             ax[j].set_title(title)
     plt.show()
@@ -216,13 +221,15 @@ def Constellation_Enc(enc, M):
             plt.xlabel('$Re(x)$')
             plt.ylabel('$Im(x)$')
     else:
-        fig, axes = plt.subplots(1,n//2,figsize=(15,4))
-        for i in range(n //2):
+        fig, axes = plt.subplots(1,n//2,figsize=(n//2 *4,4))
+        if n % 2 == 1:
+            print("The last dimension is omitted in this 2-dimensional representation because $n$ is an odd number.")
+        for i in range(n // 2):
             for j in range(M):
                 axes[i].scatter(x[j,2*i],x[j,2*i+1])
-                axes[i].set_xlabel('$Re(x_' + str(i+1) + ')$')
-                axes[i].set_ylabel('$Im(x_'+ str(i+1) +')$')
-                axes[i].set_title("channel #"+ str(i+1))
+                axes[i].set_xlabel('$x_' + str(2*i+1) + '$')
+                axes[i].set_ylabel('$x_'+ str(2*i+2) +'$')
+                axes[i].set_title("channel #"+ str(2*i+1) +" and #" +str(2*i+2))
 
     plt.show()
     
