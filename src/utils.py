@@ -169,7 +169,8 @@ def p_sample_w_Condition_DDIM(model, xt, i, j, alphas_prod, alphas_bar_sqrt, one
     xt_next = at_next.sqrt() * (xt - et * (1 - at).sqrt()) / at.sqrt() + (1 - at_next).sqrt() * et
     return xt_next
 
-def p_sample_w_Condition_DDIM_v(model, xt, i, j, alphas_prod, alphas_bar_sqrt, one_minus_alphas_bar_sqrt, shape, device, c):
+def p_sample_w_Condition_DDIM_v(model, z, i, j, alphas_prod, alphas_bar_sqrt, one_minus_alphas_bar_sqrt, shape, device, c):
+    #(model, xt, i, j, alphas_prod, alphas_bar_sqrt, one_minus_alphas_bar_sqrt, shape, device, c):
     a = extract(alphas_bar_sqrt, torch.tensor([i]).to(device), shape).to(device)
     am1 = extract(one_minus_alphas_bar_sqrt, torch.tensor([i]).to(device), shape).to(device)
     if j > -1:
@@ -178,12 +179,13 @@ def p_sample_w_Condition_DDIM_v(model, xt, i, j, alphas_prod, alphas_bar_sqrt, o
     else:
         a_next = torch.ones(shape).to(device)  # a_0 = 1
         am1_next = torch.zeros(shape).to(device)  # 1-sqrt(a_0) = 0
-    z = x_seq[-1].to(device)
+    #z = x_seq[-1].to(device)
     v_theta = model(z, torch.tensor([i]).to(device), c)
 
     # Generate Sample
     x_hat = a * z - am1 * v_theta
     z_next = a_next * x_hat + am1_next * (z - a * x_hat) / am1
+    return z_next
 
 def p_sample_loop_w_Condition_DDIM(model, shape, traj, alphas_prod, alphas_bar_sqrt, one_minus_alphas_bar_sqrt, c,
                                    pred_type='epsilon'):
