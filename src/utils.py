@@ -44,20 +44,11 @@ def make_beta_schedule(schedule='linear', n_timesteps=1000, start=1e-5, end=1e-2
 
     return betas
 
-    return betas
 
 def extract(input, t, shape):
     out = torch.gather(input, 0, t.to(input.device))
     reshape = [t.shape[0]] + [1] * (len(shape) - 1)
     return out.reshape(*reshape).to(input.device)
-
-def q_posterior_mean_variance(x_0, x_t, t,posterior_mean_coef_1,posterior_mean_coef_2,posterior_log_variance_clipped):
-    shape = x_0.shape
-    coef_1 = extract(posterior_mean_coef_1, t, shape)
-    coef_2 = extract(posterior_mean_coef_2, t, shape)
-    mean = coef_1 * x_0 + coef_2 * x_t
-    var = extract(posterior_log_variance_clipped, t, shape)
-    return mean, var
 
 def p_mean_variance(model, x, t):
     # Go through model
