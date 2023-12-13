@@ -221,8 +221,7 @@ def noise_estimation_loss(model, x_0, alphas_bar_sqrt, one_minus_alphas_bar_sqrt
     c = x_0[:, n:].to(device)
 
     # Select a random step for each example
-    t = torch.randint(0, n_steps, size=(batch_size // 2 + 1,)).to(device)
-    t = torch.cat([t, n_steps - t - 1], dim=0)[:batch_size].long()
+    t = torch.randint(0, n_steps, size=(batch_size,)).to(device).long()
     # x0 multiplier
     a = extract(alphas_bar_sqrt, t, shape).to(device)
     # eps multiplier
@@ -247,8 +246,8 @@ def v_estimation_loss(model, x_0, alphas_bar_sqrt, one_minus_alphas_bar_sqrt, n_
     c = x_0[:, n:].to(device)
 
     # Select a random step for each example
-    t = torch.randint(0, n_steps, size=(batch_size // 2 + 1,)).to(device)
-    t = torch.cat([t, n_steps - t - 1], dim=0)[:batch_size].long()
+    t = torch.randint(0, n_steps, size=(batch_size,)).to(device).long()
+   
     # x0 multiplier
     a = extract(alphas_bar_sqrt, t, shape).to(device)
     # eps multiplier
